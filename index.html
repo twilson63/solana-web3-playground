@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>Example</title>
+  <link rel="stylesheet" href="https://unpkg.com/mvp.css">
+  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+</head>
+
+<body>
+  <main>
+    <h1>Hello Solana</h1>
+    <button id="connect">Connect</button>
+  </main>
+  <script>
+    // solanaWeb3
+    document.getElementById('connect').addEventListener('click', async () => {
+      const resp = await window.solana.connect()
+      console.log(resp.publicKey.toString())
+    })
+  </script>
+</body>
+
+</html>
