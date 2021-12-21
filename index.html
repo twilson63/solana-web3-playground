@@ -9,15 +9,66 @@
 
 <body>
   <main>
-    <h1>Hello Solana</h1>
-    <button id="connect">Connect</button>
+    <h1>Hyper Coin Demo</h1>
+    <p>connect your wallet to see your hyper balance!</p>
+    <button id="connect">Connect with Solana</button>
+    <hr />
+    <div id="account">
+
+    </div>
   </main>
   <script>
+    const HYPER = '21TwLx8V8Js538eeT9ARJTa6CpdThgCwj2mkbjKRpv6J'
+    const url = 'https://api.mainnet-beta.solana.com'
+
+    function getProvider() {
+      if ("solana" in window) {
+        const provider = window.solana;
+        if (provider.isPhantom) {
+          return provider
+        }
+      }
+      window.open('https://phantom.app/', '_blank')
+    }
     // solanaWeb3
-    document.getElementById('connect').addEventListener('click', async () => {
-      const resp = await window.solana.connect()
-      console.log(resp.publicKey.toString())
+    document.getElementById('connect').addEventListener('click', async (e) => {
+      const provider = getProvider()
+      try {
+        const resp = await provider.connect()
+        e.target.textContent = 'Connected! ' + resp.publicKey.toString()
+        getHyperBal(resp.publicKey.toString())
+      } catch (err) {
+        alert(err.message)
+      }
+
     })
+
+    async function getHyperBal(wallet) {
+      const el = document.getElementById('account')
+      try {
+        const result = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'getTokenAccountsByOwner',
+            params: [
+              wallet,
+              { mint: HYPER },
+              { encoding: 'jsonParsed' }
+            ]
+          })
+        })
+        if (result.ok) {
+          const body = await result.json()
+          const amount = body.result.value[0].account.data.parsed.info.tokenAmount.uiAmount
+          el.innerHTML = `<h3>Hyper Coin</h3><p>Balance: ${amount}</p>`
+        }
+      } catch (e) {
+        el.innerHTML = `<h3>Hyper Coin</h3><p>Balance: 0</p><p>Join slack community to find out how to get some hyper coin <a href="https://hyper.io/slack">https://hyper.io/slack</a>`
+      }
+    }
   </script>
 </body>
 
